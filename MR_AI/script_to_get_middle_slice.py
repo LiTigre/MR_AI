@@ -1,10 +1,15 @@
 import os
 import nibabel as nib
 import numpy as np
+
 from nibabel.testing import data_path
 import matplotlib.pyplot as plt
 from nibabel import viewers
 from PIL import Image
+
+
+
+
 
 count_t1 = 1
 count_t2 = 1
