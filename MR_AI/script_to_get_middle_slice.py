@@ -19,7 +19,7 @@ for file_1 in os.listdir(PATH):
 		# print(file_1)
 		for file_2 in os.listdir(PATH + file_1 + '/'):
 			if '.' not in str(file_2):
-				print(file_2)
+				# print(file_2)
 				for file_3 in os.listdir(PATH + file_1 + '/' + file_2 + '/'):
 					if '.' not in str(file_3):
 						for file_4 in os.listdir(PATH + file_1 + '/' + file_2 + '/' + file_3 + '/'):
