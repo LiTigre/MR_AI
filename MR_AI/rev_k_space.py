@@ -17,6 +17,7 @@ img_2 = cv2.imread(T2, 0)
 #perform the fft
 f_1 = np.fft.fft2(img_1)
 f_2 = np.fft.fft2(img_2)
+print(type(f_2))
 #add the two images together
 f_out = f_1 + f_2
 
