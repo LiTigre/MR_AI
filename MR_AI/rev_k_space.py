@@ -6,20 +6,26 @@ import nibabel as nib
 from matplotlib import pyplot as plt
 
 #choose image that you want to convert to kspace
-T1 = '/Users/li-tigre/Downloads/lol/T1/s_1.jpg'
-T2 = '/Users/li-tigre/Downloads/lol/T1/s_2.jpg'
+T1 = '/Users/li-tigre/Downloads/og.jpg'
+T2 = '/Users/li-tigre/Downloads/tilted.jpg'
 
 #read the image
 img_1 = cv2.imread(T1, 0)
 img_2 = cv2.imread(T2, 0)
 
 
+
 #perform the fft
 f_1 = np.fft.fft2(img_1)
 f_2 = np.fft.fft2(img_2)
-print(type(f_2))
+print(len(f_2))
+
+
+# f_1[64:256-64, :] = f_2[64+10:256-64+10, :]
+
+
 #add the two images together
-f_out = f_1 + f_2
+f_out = (f_1 +f_2)/2
 
 
 rip_1 = np.fft.ifft2(f_out)
