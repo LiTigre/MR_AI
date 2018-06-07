@@ -14,7 +14,7 @@ from matplotlib import pyplot as plt
 # img_2 = cv2.imread(T2, 0)
 
 
-def merge_k_spaces(og_image, tilted_image, percentage):
+def merge_k_spaces(og_image, tilted_image, percentage = 0.5):
 
 	#perform the fft
 	f_1 = np.fft.fft2(img_1)
@@ -29,5 +29,5 @@ def merge_k_spaces(og_image, tilted_image, percentage):
 	rip2 = Image.fromarray(np.abs(rip_1))
 	rip2.show()
 
-	
+
 	return rip_1
