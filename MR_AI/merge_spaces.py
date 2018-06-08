@@ -40,8 +40,9 @@ T2 = '/Users/li-tigre/Downloads/tilted_1.jpg'
 #read the image
 img_1 = cv2.imread(T1, 0)
 img_2 = cv2.imread(T2, 0)
+print(img_1)
 
-merge_k_spaces(img_1, img_2)
+merge_k_spaces(img_1, img_2, 0.15)
 
 
 
