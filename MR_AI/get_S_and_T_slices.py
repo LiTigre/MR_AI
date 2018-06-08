@@ -13,9 +13,9 @@ from scipy.ndimage import gaussian_filter
 
 
 # Normalize the image to (0, 255)
-def normalization(my_slice):
-    my_max = np.nanmax(my_slice)
-    my_min = np.nanmin(my_slice)
+def normalization(my_slice, my_volume):
+    my_max = np.nanmax(my_volume)
+    my_min = np.nanmin(my_volume)
     my_difference = my_max - my_min
     my_adjusted = np.true_divide(my_slice - my_min, my_difference) * 255
     return my_adjusted
@@ -86,7 +86,7 @@ def rigid_transform(image, volume, x, y, z, theta, phi, r, slice_index):
     if r != 0:
         coordinates = coordinates_rotation(coordinates, [0,0,1], r, rotationCenter)
     slice_1 = fetch_points(coordinates, volume, slice_index)
-    adjusted_1 = normalization(slice_1)
+    adjusted_1 = normalization(slice_1, volume)
     return adjusted_1
 
 
@@ -120,6 +120,7 @@ def merge_k_spaces(og_image, tilted_image, percentage):
 
 # load file
 example_filename = os.path.join(data_path, sys.argv[1])
+# example_filename = os.path.join(data_path, '/Users/chloewang/Downloads/MRI_1000_T2/127731_3T_T2w_SPC1.nii.gz')
 volume = nib.load(example_filename)
 volume_data = volume.get_data()
 print(volume_data.shape)
@@ -127,20 +128,18 @@ print(volume_data.shape)
 slice_index = int(min(list(volume_data.shape))/2)
 for i in range(40, 90, 1):
     slice_index = i
+    # select original slice
     slice_0 = volume_data[:,:,slice_index]
-    # normalize pixel intensities to (0, 255)
-    adjusted_0 = normalization(slice_0)
-    # visualize the central slice
+    adjusted_0 = normalization(slice_0, volume_data)
     slice_0_img = Image.fromarray(adjusted_0)
     slice_0_img.convert('RGB').save('/Users/chloewang/Downloads/S_MRI/' + 'S_' + sys.argv[2] + '_' + str(slice_index) +'.jpg', 'JPEG')
     print('/Users/chloewang/Downloads/S_MRI/' + 'S_' + sys.argv[2] + '_' + str(slice_index) +'.jpg')
-    # get random motion parameters
+    # get transformed slice
     x, y, z = random_movement_translation()
     theta, phi, r = random_movement_rotation()
-    # get transformed slice
     slice_1 = rigid_transform(slice_0, volume_data, x, y, z, theta, phi, r, slice_index)
     # merge two slices
     percentage = random.uniform(0.2, 0.5)
     new_slice_img = merge_k_spaces(adjusted_0, slice_1, percentage)
     new_slice_img.convert('RGB').save('/Users/chloewang/Downloads/T_MRI/' + 'T_' + sys.argv[2] + '_' + str(slice_index) + '.jpg', 'JPEG')
-    print('/Users/chloewang/Downloads/T_MRI/' + 'T_' + sys.argv[2] + '_' + str(slice_index) + '.jpg')
+    print('/Users/chloewang/Downloads/S_MRI/' + 'T_' + sys.argv[2] + '_' + str(slice_index) + '.jpg')
