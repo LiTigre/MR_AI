@@ -120,7 +120,7 @@ import torchvision.transforms as transforms
 
 import random
 
-batch_size = 278
+batch_size = 51
 
 # train_loader = torch.utils.data.DataLoader(my_dataset_train, batch_size, shuffle=True)
 
@@ -217,11 +217,11 @@ from scipy import signal as signal
 
 
 def plot_thingy(out, y):
-    out = out.view(out.size(0), -1)
+
     out = out.detach().numpy()
     y = y.detach().numpy()
     pca = PCA(n_components=2)
-    X_r = pca.fit(out).transform(out)
+    X_r = pca.fit(out).transform(out)*255
     print(X_r[:2])
     plt.figure()
     #colors = ['navy','darkorange']
@@ -232,8 +232,6 @@ def plot_thingy(out, y):
     plt.legend(loc='best', shadow=False, scatterpoints=1)
     plt.title('dataset')
     plt.show()
-
-
 
 
 class ConvNet(nn.Module):
@@ -347,8 +345,8 @@ class ConvNet(nn.Module):
         # out = self.batch_lin_3(self.linear3(out))
         out = self.relu(self.linear1(out))
         out = self.relu(self.linear2(out))
-        out = self.relu(self.linear3(out))
-        out = self.softmax(out)
+        # out = self.relu(self.linear3(out))
+        #out = self.softmax(out)
         
         return out
 
@@ -459,7 +457,7 @@ def eval(model, test_loader):
         #   target = target.cuda()
         
         prediction = model(data)
-        plot_thingy(data, target)
+        plot_thingy(prediction, target)
         # compute the loss
         # cross entrophy function
         loss = cost_function(prediction, target) 
@@ -483,7 +481,7 @@ def eval(model, test_loader):
     
     return mean_loss, acc
 
-def load_model(epoch, model, path='/Users/li-tigre/Desktop/MR_AI/Models/Classifier/model_classify_v1/'):
+def load_model(epoch, model, path='/Users/li-tigre/Desktop/MR_AI/scripts/Models/neural_net/'):
     
     # file name and path 
     filename = path + 'neural_network_{}.pt'.format(epoch)
@@ -546,7 +544,7 @@ neural_net = load_model(4, neural_net)
     
 print("\n\n\nOptimization ended.\n")
 
-# test_loss, test_acc = eval(neural_net, test_loader)
+test_loss, test_acc = eval(neural_net, test_loader)
 # print(test_acc)
 
 
@@ -593,19 +591,9 @@ def resizeAndPad(img, size, padColor=0):
 
     return scaled_img
 
-def normalization(my_slice):
-    my_mean = np.mean(my_slice)
-    my_std = np.std(my_slice)
-    my_adjusted_0 = np.true_divide(my_slice - my_mean, my_std)
-    my_max = np.nanmax(my_adjusted_0)
-    my_min = np.nanmin(my_adjusted_0)
-    my_difference = my_max - my_min
-    my_adjusted = np.true_divide(my_adjusted_0 - my_min, my_difference) * 255
-    return my_adjusted
 
-img_as_img = cv2.imread('/Users/li-tigre/Downloads/35272129_627504640935870_4578129645102170112_n.jpg', 0)
+img_as_img = cv2.imread('/Users/li-tigre/Downloads/rip.jpg', 0)
 print(img_as_img)
-img_as_img = normalization(img_as_img)
 img_as_img = resizeAndPad(img_as_img, (256, 256), 0)
 print(img_as_img.shape)
 img_as_img = img_as_img[np.newaxis, ...]
