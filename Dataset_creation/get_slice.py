@@ -142,8 +142,8 @@ for i in range(40, 90, 1):
     slice_0 = volume_data[:,:,slice_index]
     adjusted_0 = normalization(slice_0)
     slice_0_img = Image.fromarray(adjusted_0)
-    slice_0_img.convert('RGB').save('/Users/chloewang/Downloads/Train/' + 'S_' + sys.argv[2] + '_' + str(slice_index) +'.jpg', 'JPEG')
-    print('/Users/chloewang/Downloads/Test/' + 'S_' + sys.argv[2] + '_' + str(slice_index) +'.jpg')
+    slice_0_img.convert('RGB').save('/Users/li-tigre/Downloads/Validation/' + 'S_' + sys.argv[2] + '_' + str(slice_index) +'.jpg', 'JPEG')
+    print('/Users/li-tigre/Downloads/Train_1/' + 'S_' + sys.argv[2] + '_' + str(slice_index) +'.jpg')
     # get transformed slice
     x, y, z = random_movement_translation()
     theta, phi, r = random_movement_rotation()
@@ -151,5 +151,5 @@ for i in range(40, 90, 1):
     # merge two slices
     percentage = random.uniform(0.2, 0.5)
     new_slice_img = merge_k_spaces(adjusted_0, slice_1, percentage)
-    new_slice_img.convert('RGB').save('/Users/chloewang/Downloads/Train/' + 'T_' + sys.argv[2] + '_' + str(slice_index) + '.jpg', 'JPEG')
-    print('/Users/chloewang/Downloads/Test/' + 'T_' + sys.argv[2] + '_' + str(slice_index) + '.jpg')
+    new_slice_img.convert('RGB').save('/Users/li-tigre/Downloads/Validation/' + 'T_' + sys.argv[2] + '_' + str(slice_index) + '.jpg', 'JPEG')
+    print('/Users/li-tigre/Downloads/Train_1/' + 'T_' + sys.argv[2] + '_' + str(slice_index) + '.jpg')

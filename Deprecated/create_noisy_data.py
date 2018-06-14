@@ -24,12 +24,6 @@ for file_1 in os.listdir(PATH):
 					if '.' not in str(file_3):
 						for file_4 in os.listdir(PATH + file_1 + '/' + file_2 + '/' + file_3 + '/'):
 							if file_4.endswith('.gz'):
-
-								#perform rigit transform
-								#perform k-space merge
-
-
-								#save the noisy image in T2
 								
 
 
