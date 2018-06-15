@@ -604,7 +604,7 @@ def normalization(my_slice):
     return my_adjusted
 
 img_as_img = cv2.imread('/Users/li-tigre/Downloads/35272129_627504640935870_4578129645102170112_n.jpg', 0)
-print(img_as_img)
+# print(img_as_img)
 img_as_img = normalization(img_as_img)
 img_as_img = resizeAndPad(img_as_img, (256, 256), 0)
 print(img_as_img.shape)
