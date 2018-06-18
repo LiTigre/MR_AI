@@ -5,7 +5,7 @@ from tkinter import messagebox
 from tkinter.ttk import Progressbar
 import threading
 import time
-import os, shutil
+import os, shutil, webbrowser
 import numpy as np
 
 class backend:
@@ -140,12 +140,14 @@ class buildGUI(Frame):
             self.progress.grid(row=5,column=0)
             self.progress.start()
             (good, uncertain, bad ) = self.process.runModel(self.progress)
-            messagebox.showinfo('Info', 'Process completed! \nThere are : \n-' +
+            if messagebox.askyesno('Process completed!',  'There are : \n-' +
                                         good + " good scans \n-" +
                                         bad  + " bad scans \n-" +
-                                        uncertain + " uncertain scans \n")
+                                        uncertain + " uncertain scans \n\n" +
+                                        "Do you want to go to the output directory?"):
+                                            webbrowser.open(self.outputDir)                     
             self.progress.grid_forget()
-            self.ask_to_see_user()
+            #self.ask_to_see_user()
             
 
         threading.Thread(target=runInner).start() 
