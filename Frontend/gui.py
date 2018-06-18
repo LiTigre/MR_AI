@@ -115,11 +115,6 @@ class buildGUI(Frame):
             
             # Percentage (advanced options)
 
-            #percentageLabel = Label(self, text="Percentage accuracy")
-            #percentageLabel.grid(row=2, column=0)
-            #self.percentage = Entry(self)
-            #self.percentage.grid(row=2, column=1)
-
             # Start 
             self.startButton = Button(self.mainTab, text="Start", command=self.run )
             self.startButton.grid(row=3, column=0)
@@ -151,7 +146,7 @@ class buildGUI(Frame):
                                         good + " good scans \n-" +
                                         bad  + " bad scans \n-" +
                                         uncertain + " uncertain scans \n\n" +
-                                        "Do you want to go to the output directory?"):
+                                        "Do you want to go to the output directory?", icon = messagebox.INFO):
                                             webbrowser.open(self.outputDir)                     
             self.progress.grid_forget()
             
