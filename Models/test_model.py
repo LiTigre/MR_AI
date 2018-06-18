@@ -396,7 +396,7 @@ def eval(model, test_loader):
     
     return mean_loss, acc
 
-def load_model(epoch, model, path='/Users/li-tigre/Desktop/MR_AI/Models/Classifier/model_classify_v1/'):
+def load_model(epoch, model, path='/Users/li-tigre/Desktop/MR_AI/Models/Classifier/model_classify_v1_chloe/'):
     
     # file name and path 
     filename = path + 'neural_network_{}.pt'.format(epoch)
@@ -422,7 +422,7 @@ path = './'
 
 
 
-neural_net = load_model(6, neural_net)
+neural_net = load_model(10, neural_net)
 
 #traininng 
 # for epoch in range(1, numEpochs + 1):
