@@ -80,11 +80,10 @@ def register_extensions(id, extensions):
   for extension in extensions: register_extension(id, extension)
 Image.register_extensions = register_extensions
 
-my_dataset_test = CustomDatasetFromImages("/Users/li-tigre/Desktop/data/test_names.csv", "/Users/li-tigre/Desktop/data/Test")
 
-my_dataset_val = CustomDatasetFromImages("/Users/li-tigre/Desktop/data/val_names.csv", "/Users/li-tigre/Desktop/data/Validation")
+#DATASET
 
-my_dataset_train = CustomDatasetFromImages("/Users/li-tigre/Desktop/data/train_names.csv", "/Users/li-tigre/Desktop/data/Train")
+my_dataset_test = CustomDatasetFromImages("/Users/li-tigre/Desktop/test_names.csv", "/Users/li-tigre/Desktop/test_model/")
 
 import torchvision.datasets as data
 
@@ -92,13 +91,12 @@ import torchvision.transforms as transforms
 
 import random
 
-batch_size = 100
+#batch size should be size of your data
+batch_size = 65
 
-train_loader = torch.utils.data.DataLoader(my_dataset_train, batch_size, shuffle=True)
 
 test_loader = torch.utils.data.DataLoader(my_dataset_test, batch_size, shuffle=True)
 
-val_loader = torch.utils.data.DataLoader(my_dataset_val, batch_size, shuffle=True)
 
 #create dictionary for hyperparameters
 #following Sumana's recommendations
@@ -315,6 +313,7 @@ def train(epoch, model, train_loader, optimizer):
 
         # compute the loss
         loss = cost_function(prediction, target)
+
         # compute the gradients 
         loss.backward()
 
@@ -372,8 +371,7 @@ def eval(model, test_loader):
     for batch_idx, (data, target) in enumerate(test_loader):
         
         prediction = model(data)
-
-    # Last checkpoint
+        print(prediction)
         # compute the loss
         # cross entrophy function
         loss = cost_function(prediction, target) 
@@ -383,6 +381,7 @@ def eval(model, test_loader):
         
         # compute the accuracy per minibatch  
         pred_classes = prediction.data.max(1, keepdim=True)[1]
+        print(pred_classes)
         correct += pred_classes.eq(target.data.view_as(pred_classes)).sum().double()
     # compute the mean loss
     mean_loss = total_loss/len(test_loader.dataset)
@@ -413,7 +412,7 @@ def load_model(epoch, model, path='/Users/li-tigre/Desktop/MR_AI/Models/Classifi
 
 
 # Number of epochs 
-numEpochs = 4
+numEpochs = 1
 
 # checkpoint frequency 
 checkpoint_freq = 1
@@ -421,129 +420,122 @@ checkpoint_freq = 1
 # path to save the data 
 path = './'
 
-# empty lists 
-train_losses = []
-val_losses = []
-test_losses = []
 
-train_accuracies = []
-val_accuracies = []
-test_accuracies = []
 
-# neural_net = load_model(4, neural_net)
+neural_net = load_model(6, neural_net)
 
 #traininng 
-for epoch in range(1, numEpochs + 1):
+# for epoch in range(1, numEpochs + 1):
     
-    # train() function (see above)
-    train_loss, train_acc = train(epoch, neural_net, train_loader, optimizer)
+#     # train() function (see above)
+#     train_loss, train_acc = train(epoch, neural_net, train_loader, optimizer)
     
-    # eval() functionn (see above)
-    val_loss, val_acc = eval(neural_net, val_loader)    
-    test_loss, test_acc = eval(neural_net, test_loader)    
-
-    
-    # append lists for plotting and printing 
-    train_losses.append(train_loss)    
-    val_losses.append(val_loss)
+#     # eval() functionn (see above)
+#     val_loss, val_acc = eval(neural_net, val_loader)    
+#     test_loss, test_acc = eval(neural_net, test_loader)    
 
     
-    train_accuracies.append(train_acc)    
-    val_accuracies.append(val_acc)
-    
-    #Checkpoint
-    if epoch % checkpoint_freq == 0:
-        save_model(epoch, neural_net, path)
-
-    x = list(range(len(train_accuracies)))
-
-    # ax = plt.subplot(111)
-    plt.plot(x, train_accuracies, 'r', label="Train")
-    plt.plot(x, val_accuracies, 'g', label="Validation")
-    plt.title('Accuracy')
-    leg = plt.legend(loc='best', ncol=2, mode="expand", shadow=False, fancybox=False)
-    leg.get_frame().set_alpha(0.99)
-
-    # Last checkpoint
-    save_model(numEpochs, neural_net, path)
-
-
-    x = list(range(len(train_losses)))
-
-    # ax = plt.subplot(111)
-    plt.plot(x, train_losses, 'r', label="Train")
-    plt.plot(x, val_losses, 'g', label="Validation")
-    plt.title('Accuracy')
-    leg = plt.legend(loc='best', ncol=2, mode="expand", shadow=False, fancybox=False)
-    leg.get_frame().set_alpha(0.99)
-
-    # Last checkpoint
-save_model(numEpochs, neural_net, path)
+#     # append lists for plotting and printing 
+#     train_losses.append(train_loss)    
+#     val_losses.append(val_loss)
 
     
-print("\n\n\nOptimization ended.\n")
+#     train_accuracies.append(train_acc)    
+#     val_accuracies.append(val_acc)
+    
+#     #Checkpoint
+#     if epoch % checkpoint_freq == 0:
+#         save_model(epoch, neural_net, path)
 
-# test_loss, test_acc = eval(neural_net, test_loader)
-# print(test_acc)
+#     x = list(range(len(train_accuracies)))
 
+#     # ax = plt.subplot(111)
+#     plt.plot(x, train_accuracies, 'r', label="Train")
+#     plt.plot(x, val_accuracies, 'g', label="Validation")
+#     plt.title('Accuracy')
+#     leg = plt.legend(loc='best', ncol=2, mode="expand", shadow=False, fancybox=False)
+#     leg.get_frame().set_alpha(0.99)
 
-
-
-def resizeAndPad(img, size, padColor=0):
-
-    h, w = img.shape[:2]
-    sh, sw = size
-
-    # interpolation method
-    if h > sh or w > sw: # shrinking image
-        interp = cv2.INTER_AREA
-    else: # stretching image
-        interp = cv2.INTER_CUBIC
-
-    # aspect ratio of image
-    aspect = w/h  # if on Python 2, you might need to cast as a float: float(w)/h
-
-    # compute scaling and pad sizing
-    if aspect > 1: # horizontal image
-        new_w = sw
-        new_h = np.round(new_w/aspect).astype(int)
-        pad_vert = (sh-new_h)/2
-        pad_top, pad_bot = np.floor(pad_vert).astype(int), np.ceil(pad_vert).astype(int)
-        pad_left, pad_right = 0, 0
-    elif aspect < 1: # vertical image
-        new_h = sh
-        new_w = np.round(new_h*aspect).astype(int)
-        pad_horz = (sw-new_w)/2
-        pad_left, pad_right = np.floor(pad_horz).astype(int), np.ceil(pad_horz).astype(int)
-        pad_top, pad_bot = 0, 0
-    else: # square image
-        new_h, new_w = sh, sw
-        pad_left, pad_right, pad_top, pad_bot = 0, 0, 0, 0
-
-    # set pad color
-    if len(img.shape) is 3 and not isinstance(padColor, (list, tuple, np.ndarray)): # color image but only one color provided
-        padColor = [padColor]*3
-
-    # scale and pad
-    scaled_img = cv2.resize(img, (new_w, new_h), interpolation=interp)
-    scaled_img = cv2.copyMakeBorder(scaled_img, pad_top, pad_bot, pad_left, pad_right, borderType=cv2.BORDER_CONSTANT, value=padColor)
-
-    return scaled_img
+#     # Last checkpoint
+#     save_model(numEpochs, neural_net, path)
 
 
-img_as_img = cv2.imread('/Users/li-tigre/Downloads/T_0_72.jpg', 0)
-print(img_as_img)
-img_as_img = resizeAndPad(img_as_img, (256, 256), 0)
-print(img_as_img.shape)
-img_as_img = img_as_img[np.newaxis, ...]
-img_as_img = img_as_img[np.newaxis, ...]
-img_as_img = img_as_img/255
-print(img_as_img.shape)
+#     x = list(range(len(train_losses)))
 
-img_as_tensor = torch.tensor(img_as_img, dtype=torch.float)
+#     # ax = plt.subplot(111)
+#     plt.plot(x, train_losses, 'r', label="Train")
+#     plt.plot(x, val_losses, 'g', label="Validation")
+#     plt.title('Accuracy')
+#     leg = plt.legend(loc='best', ncol=2, mode="expand", shadow=False, fancybox=False)
+#     leg.get_frame().set_alpha(0.99)
 
-out = neural_net(img_as_tensor)
-print(out)
+#     # Last checkpoint
+# save_model(numEpochs, neural_net, path)
+
+    
+# print("\n\n\nOptimization ended.\n")
+
+test_loss, test_acc = eval(neural_net, test_loader)
+print(test_acc)
+
+
+
+
+# def resizeAndPad(img, size, padColor=0):
+
+#     h, w = img.shape[:2]
+#     sh, sw = size
+
+#     # interpolation method
+#     if h > sh or w > sw: # shrinking image
+#         interp = cv2.INTER_AREA
+#     else: # stretching image
+#         interp = cv2.INTER_CUBIC
+
+#     # aspect ratio of image
+#     aspect = w/h  # if on Python 2, you might need to cast as a float: float(w)/h
+
+#     # compute scaling and pad sizing
+#     if aspect > 1: # horizontal image
+#         new_w = sw
+#         new_h = np.round(new_w/aspect).astype(int)
+#         pad_vert = (sh-new_h)/2
+#         pad_top, pad_bot = np.floor(pad_vert).astype(int), np.ceil(pad_vert).astype(int)
+#         pad_left, pad_right = 0, 0
+#     elif aspect < 1: # vertical image
+#         new_h = sh
+#         new_w = np.round(new_h*aspect).astype(int)
+#         pad_horz = (sw-new_w)/2
+#         pad_left, pad_right = np.floor(pad_horz).astype(int), np.ceil(pad_horz).astype(int)
+#         pad_top, pad_bot = 0, 0
+#     else: # square image
+#         new_h, new_w = sh, sw
+#         pad_left, pad_right, pad_top, pad_bot = 0, 0, 0, 0
+
+#     # set pad color
+#     if len(img.shape) is 3 and not isinstance(padColor, (list, tuple, np.ndarray)): # color image but only one color provided
+#         padColor = [padColor]*3
+
+#     # scale and pad
+#     scaled_img = cv2.resize(img, (new_w, new_h), interpolation=interp)
+#     scaled_img = cv2.copyMakeBorder(scaled_img, pad_top, pad_bot, pad_left, pad_right, borderType=cv2.BORDER_CONSTANT, value=padColor)
+
+#     return scaled_img
+
+
+# img_as_img = cv2.imread('/Users/li-tigre/Downloads/T_0_72.jpg', 0)
+# print(img_as_img)
+# img_as_img = resizeAndPad(img_as_img, (256, 256), 0)
+# print(img_as_img.shape)
+# img_as_img = img_as_img[np.newaxis, ...]
+# img_as_img = img_as_img[np.newaxis, ...]
+# img_as_img = img_as_img/255
+# print(img_as_img.shape)
+
+# img_as_tensor = torch.tensor(img_as_img, dtype=torch.float)
+
+# out = neural_net(img_as_tensor)
+# print(out)
 
 # x = list(range(len(train_accuracies)))
 

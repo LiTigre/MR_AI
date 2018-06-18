@@ -2,9 +2,9 @@ import csv
 import os
 
 
-PATH = '/Users/li-tigre/Downloads/plot_test/'
+PATH = '/Users/li-tigre/Desktop/test_model/'
 
-with open('plot_names.csv', 'w') as csvfile:
+with open('test_names.csv', 'w') as csvfile:
     spamwriter = csv.writer(csvfile)
     for file in os.listdir(PATH):
         if file != '.DS_Store':

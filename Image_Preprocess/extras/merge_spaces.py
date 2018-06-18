@@ -24,8 +24,8 @@ def merge_k_spaces(og_image, tilted_image, percentage = 0.5):
 	img_blur = gaussian_filter(img_out, sigma=0.1)
 
 	#temporary to show the image
-	print(type(img_blur))
-	img_show = Image.fromarray(np.abs(img_blur))	
+	# print(type(img_blur))
+	img_show = Image.fromarray(np.abs(img_out))	
 	print(type(img_show))
 	img_show.show()
 
@@ -34,15 +34,15 @@ def merge_k_spaces(og_image, tilted_image, percentage = 0.5):
 
 
 #choose image that you want to convert to kspace
-T1 = '/Users/li-tigre/Downloads/og.jpg'
-T2 = '/Users/li-tigre/Downloads/tilted_1.jpg'
+T1 = '/Users/li-tigre/Downloads/S_109_40.jpg'
+T2 = '/Users/li-tigre/Downloads/S_112_49.jpg'
 
 #read the image
 img_1 = cv2.imread(T1, 0)
 img_2 = cv2.imread(T2, 0)
-print(img_1)
+# print(img_1)
 
-merge_k_spaces(img_1, img_2, 0.15)
+merge_k_spaces(img_1, img_2, 0.5)
 
 
 
