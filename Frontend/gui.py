@@ -74,22 +74,18 @@ class buildGUI(Frame):
             self.countdownButton = Button(self.mainTab, text = "Start", command = self.toggle)
             self.countdownButton.grid(row=1, column=0)
 
-            self.paused = True
-
-
-            # TODO: disable button once counter at 0
-
-
             # TODO: Image viewer
             # self.imageViewer = imageViewer.ImageViewer(self.mainTab)
             # self.imageView = self.imageViewer.btn
             # self.imageView.grid(row = 1, column = 0)
   
             # TODO: Buttons
-            self.blurryButton = Button(self.mainTab, text="Blurry", command= self.mainTab.quit )
+            self.blurryCount = 0
+            self.nonBlurryCount = 0
+            self.blurryButton = Button(self.mainTab, text="Blurry", command= self.addBlurry)
             self.blurryButton.grid(row=5, column=0)
 
-            self.notBlurryButton = Button(self.mainTab, text="Not Blurry", command=self.mainTab.quit )
+            self.notBlurryButton = Button(self.mainTab, text="Not Blurry", command=self.addNotBlurry)
             self.notBlurryButton.grid(row=5, column=1)
 
             # TODO: Dynamic display
@@ -133,6 +129,8 @@ class buildGUI(Frame):
             self.countdown()
         else:
             self.timeLeft = 10
+            self.blurryCount = 0
+            self.nonBlurryCount = 0
             self.paused = True
             self.countdownButton.config(text='Start')
 
@@ -148,7 +146,13 @@ class buildGUI(Frame):
             self.timeLeft = self.timeLeft - 1
             self.after(1000, self.countdown)
             
-
+    def addBlurry(self):
+        self.blurryCount =  self.blurryCount + 1
+        print(self.blurryCount)
+    
+    def addNotBlurry(self):
+        self.nonBlurryCount =  self.nonBlurryCount + 1
+        print(self.nonBlurryCount)
         
 
 class buildMenu(Frame):
