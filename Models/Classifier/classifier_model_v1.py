@@ -397,7 +397,7 @@ def eval(model, test_loader):
     
     return mean_loss, acc
 
-def load_model(epoch, model, path='/Users/li-tigre/Desktop/MR_AI/Models/Classifier/model_classify_v1/'):
+def load_model(epoch, model, path='/Users/li-tigre/Desktop/data/model/'):
     
     # file name and path 
     filename = path + 'neural_network_{}.pt'.format(epoch)
@@ -413,7 +413,7 @@ def load_model(epoch, model, path='/Users/li-tigre/Desktop/MR_AI/Models/Classifi
 
 
 # Number of epochs 
-numEpochs = 16
+numEpochs = 45
 
 # checkpoint frequency 
 checkpoint_freq = 1
@@ -430,10 +430,10 @@ train_accuracies = []
 val_accuracies = []
 test_accuracies = []
 
-# neural_net = load_model(4, neural_net)
+neural_net = load_model(35, neural_net)
 
 #traininng 
-for epoch in range(1, numEpochs + 1):
+for epoch in range(36, numEpochs + 1):
     
     # train() function (see above)
     train_loss, train_acc = train(epoch, neural_net, train_loader, optimizer)
