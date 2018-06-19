@@ -3,71 +3,15 @@ from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
 from tkinter.ttk import Progressbar
+
 import threading
 import time
 import os, shutil, webbrowser
 import numpy as np
 
-class backend:
-    def __init__(self, typeNeuralNet):
-        self.typeNeuralNet = typeNeuralNet
-        self.finished = False
+import backend
+import imageViewer
 
-    def runModel(self, progressBar):
-        time.sleep(5)
-        progressBar.stop()
-        self.finished = True
-        print("Done")
-        good = "13"
-        uncertain = "4"
-        bad = "1996"
-        output = (good, uncertain, bad )
-        return output
-    
-    def preprocessing(self, inputFile):
-        return
-        #TODO
-
-
-    def loadModel(self, weights):
-        return
-
-        # TODO
-        # if (self.typeNeuralNet == "Classification-CNN"):
-            # neural_net = ConvNet()
-            # neural_net.load_state_dict(torch.load(filename))
-        # if (self.typeNeuralNet == "Denoising-CNN"):
-
-
-    def useModel(self, model):
-        return
-        # TODO
-        #dataset = CustomDatasetFromImages("drive/S_and_T_images/Test/Test/test_names.csv", "drive/S_and_T_images/Test/Test/")
-        #val_loader = torch.utils.data.DataLoader(my_dataset_val, batch_size = 100, shuffle=True)
-
-    
-    def move_files(self, modelOutputs, inputFolder, outputFolder):
-        dir1 = "/good"
-        dir2 = "/bad"
-        dir3 = "/unsure"
-        os.makedirs(os.path.join(outputFolder, dir1))
-        os.makedirs(os.path.join(outputFolder, dir2))
-        os.makedirs(os.path.join(outputFolder, dir3))
-
-        list_input = [i for i in os.listdir(inputFolder)]
-
-        for i, proba in enumerate(modelOutputs):
-            if proba < 0.5 :#random number
-                shutil.copy(list_input[i], outputFolder+ dir1)              
-            elif proba > 0.5 :
-                shutil.copy(list_input[i], outputFolder+ dir2)
-            else:
-                shutil.copy(list_input[i], outputFolder+ dir3)
-
-
-    def create_csv(self, inputs, outputs, true_values, rmse_vals=None):
-        return
-     
 
 class buildGUI(Frame):
     def __init__(self, typeNeuralNet, master = None):
@@ -85,24 +29,23 @@ class buildGUI(Frame):
         self.mainTab = ttk.Frame(self.tabControl)
         self.tabControl.add(self.mainTab, text='Main')
         self.tabControl.pack(expand=1, fill='both')
-        self.advancedOptionsTab(self.tabControl)
-
-        #Input
-        inputLabel = Label(self.mainTab, text="Input Folder")
-        inputLabel.grid(row=0, column=0)
-
-        #Output
-        outputLabel = Label(self.mainTab, text="Output Folder")
-        outputLabel.grid(row=1, column=0)
-
-        #Backend
-        self.process = backend(self.typeNeuralNet)
-
-        #Progress bar
-        self.progress = Progressbar(self.mainTab, orient=HORIZONTAL,length=500,  mode='indeterminate')
-
-        
         if (self.typeNeuralNet == "Classification-CNN"):
+            self.advancedOptionsTab(self.tabControl)
+
+            #Input
+            inputLabel = Label(self.mainTab, text="Input Folder")
+            inputLabel.grid(row=0, column=0)
+
+            #Output
+            outputLabel = Label(self.mainTab, text="Output Folder")
+            outputLabel.grid(row=1, column=0)
+
+            #Backend
+            self.process = backend.Backend(self.typeNeuralNet)
+
+            #Progress bar
+            self.progress = Progressbar(self.mainTab, orient=HORIZONTAL,length=500,  mode='indeterminate')
+
             #Input Folder
             self.inputDir = filedialog.askdirectory(title = "Select input directory")
             self.input = Label(self.mainTab, text=self.inputDir)
@@ -113,34 +56,33 @@ class buildGUI(Frame):
             self.output = Label(self.mainTab, text=self.outputDir)
             self.output.grid(row=1, column=1)
             
-            # Percentage (advanced options)
-
-            #percentageLabel = Label(self, text="Percentage accuracy")
-            #percentageLabel.grid(row=2, column=0)
-            #self.percentage = Entry(self)
-            #self.percentage.grid(row=2, column=1)
 
             # Start 
             self.startButton = Button(self.mainTab, text="Start", command=self.run )
             self.startButton.grid(row=3, column=0)
 
-        if (self.typeNeuralNet == "Denoising-CNN"):
-            #Input File
-            self.inputFile = filedialog.asksaveasfilename(initialdir = "/",title = "Select file",filetypes = (("jpeg files","*.jpg"),("all files","*.*")))
-            self.input = Label(self.mainTab, text=self.inputFile)
-            self.input.grid(row=0, column=1)
+        if (self.typeNeuralNet == "Self-classification"):
 
-            #Output Folder
-            self.outputDir = filedialog.askdirectory()
-            self.output = Label(self.mainTab, text=self.outputDir)
-            self.output.grid(row=1, column=1)
+            # TODO: counter
+            # TODO: disable button once counter at 0
 
-            #Option to display output
-            self.display_output = ttk.Checkbutton(self.mainTab, text="Display Output")
-            self.display_output.grid(row=2, column = 0)
 
-            self.start = Button(self.mainTab, text="Start", command=self.run)
-            self.start.grid(row=3, column=1)
+            # TODO: Image viewer
+            self.imageViewer = imageViewer.ImageViewer(self.mainTab)
+            self.imageViewer.btn.grid(row = 1)
+
+            # TODO: Buttons
+            self.blurryButton = Button(self.mainTab, text="Blurry", command= self.mainTab.quit )
+            self.blurryButton.grid(row=5, column=0)
+
+            self.notBlurryButton = Button(self.mainTab, text="Not Blurry", command=self.mainTab.quit )
+            self.notBlurryButton.grid(row=5, column=1)
+
+            # TODO: Dynamic display
+
+            
+
+
     
     def run(self):
         def runInner():
@@ -151,7 +93,7 @@ class buildGUI(Frame):
                                         good + " good scans \n-" +
                                         bad  + " bad scans \n-" +
                                         uncertain + " uncertain scans \n\n" +
-                                        "Do you want to go to the output directory?"):
+                                        "Do you want to go to the output directory?", icon = messagebox.INFO):
                                             webbrowser.open(self.outputDir)                     
             self.progress.grid_forget()
             
@@ -169,9 +111,6 @@ class buildGUI(Frame):
         self.percentage.grid(row=0, column=1)
         
 
-
-# TODO: borders, option in messagebox, more advanced options
-
 class buildMenu(Frame):
     def __init__(self, master = None):
         Frame.__init__(self, master)
@@ -183,10 +122,10 @@ class buildMenu(Frame):
         self.pack(fill=BOTH, expand=1)
 
         #Neural net selection
-        menuLabel = Label(self, text="Select a neural net")
+        menuLabel = Label(self, text="Select a mode")
         menuLabel.grid(row=0, column=0)
 
-        menuOptions = ["Classification-CNN", "Denoising-CNN"]
+        menuOptions = ["Classification-CNN", "Self-classification"]
         variable = StringVar(self.master)
         variable.set("               ")
 
