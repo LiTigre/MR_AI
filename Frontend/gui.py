@@ -3,13 +3,15 @@ from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
 from tkinter.ttk import Progressbar
+
 import threading
 import time
 import os, shutil, webbrowser
 import numpy as np
-import backend
 
-     
+import backend
+import imageViewer
+
 
 class buildGUI(Frame):
     def __init__(self, typeNeuralNet, master = None):
@@ -27,24 +29,23 @@ class buildGUI(Frame):
         self.mainTab = ttk.Frame(self.tabControl)
         self.tabControl.add(self.mainTab, text='Main')
         self.tabControl.pack(expand=1, fill='both')
-        self.advancedOptionsTab(self.tabControl)
-
-        #Input
-        inputLabel = Label(self.mainTab, text="Input Folder")
-        inputLabel.grid(row=0, column=0)
-
-        #Output
-        outputLabel = Label(self.mainTab, text="Output Folder")
-        outputLabel.grid(row=1, column=0)
-
-        #Backend
-        self.process = backend.Backend(self.typeNeuralNet)
-
-        #Progress bar
-        self.progress = Progressbar(self.mainTab, orient=HORIZONTAL,length=500,  mode='indeterminate')
-
-        
         if (self.typeNeuralNet == "Classification-CNN"):
+            self.advancedOptionsTab(self.tabControl)
+
+            #Input
+            inputLabel = Label(self.mainTab, text="Input Folder")
+            inputLabel.grid(row=0, column=0)
+
+            #Output
+            outputLabel = Label(self.mainTab, text="Output Folder")
+            outputLabel.grid(row=1, column=0)
+
+            #Backend
+            self.process = backend.Backend(self.typeNeuralNet)
+
+            #Progress bar
+            self.progress = Progressbar(self.mainTab, orient=HORIZONTAL,length=500,  mode='indeterminate')
+
             #Input Folder
             self.inputDir = filedialog.askdirectory(title = "Select input directory")
             self.input = Label(self.mainTab, text=self.inputDir)
@@ -55,29 +56,33 @@ class buildGUI(Frame):
             self.output = Label(self.mainTab, text=self.outputDir)
             self.output.grid(row=1, column=1)
             
-            # Percentage (advanced options)
 
             # Start 
             self.startButton = Button(self.mainTab, text="Start", command=self.run )
             self.startButton.grid(row=3, column=0)
 
         if (self.typeNeuralNet == "Self-classification"):
-            #Input File
-            self.inputFile = filedialog.asksaveasfilename(initialdir = "/",title = "Select file",filetypes = (("jpeg files","*.jpg"),("all files","*.*")))
-            self.input = Label(self.mainTab, text=self.inputFile)
-            self.input.grid(row=0, column=1)
 
-            #Output Folder
-            self.outputDir = filedialog.askdirectory()
-            self.output = Label(self.mainTab, text=self.outputDir)
-            self.output.grid(row=1, column=1)
+            # TODO: counter
+            # TODO: disable button once counter at 0
 
-            #Option to display output
-            self.display_output = ttk.Checkbutton(self.mainTab, text="Display Output")
-            self.display_output.grid(row=2, column = 0)
 
-            self.start = Button(self.mainTab, text="Start", command=self.run)
-            self.start.grid(row=3, column=1)
+            # TODO: Image viewer
+            self.imageViewer = imageViewer.ImageViewer(self.mainTab)
+            self.imageViewer.btn.grid(row = 1)
+
+            # TODO: Buttons
+            self.blurryButton = Button(self.mainTab, text="Blurry", command= self.mainTab.quit )
+            self.blurryButton.grid(row=5, column=0)
+
+            self.notBlurryButton = Button(self.mainTab, text="Not Blurry", command=self.mainTab.quit )
+            self.notBlurryButton.grid(row=5, column=1)
+
+            # TODO: Dynamic display
+
+            
+
+
     
     def run(self):
         def runInner():
