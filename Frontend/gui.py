@@ -4,9 +4,6 @@ from tkinter import filedialog
 from tkinter import messagebox
 from tkinter.ttk import Progressbar
 
-import tkinter as tk
-from PIL import ImageTk, Image
-
 import threading
 import time
 import os, shutil, webbrowser
@@ -33,7 +30,8 @@ class buildGUI(Frame):
         self.mainTab = ttk.Frame(self.tabControl)
         self.tabControl.add(self.mainTab, text='Main')
         self.tabControl.pack(expand=1, fill='both')
-        
+
+
         if (self.typeNeuralNet == "Classification-CNN"):
             self.advancedOptionsTab(self.tabControl)
 
@@ -45,11 +43,6 @@ class buildGUI(Frame):
             outputLabel = Label(self.mainTab, text="Output Folder")
             outputLabel.grid(row=1, column=0)
 
-            #Backend
-            self.process = backend.Backend(self.typeNeuralNet)
-
-            #Progress bar
-            self.progress = Progressbar(self.mainTab, orient=HORIZONTAL,length=500,  mode='indeterminate')
 
             #Input Folder
             self.inputDir = filedialog.askdirectory(title = "Select input directory")
@@ -60,10 +53,15 @@ class buildGUI(Frame):
             self.outputDir = filedialog.askdirectory(title = "Select output directory")
             self.output = Label(self.mainTab, text=self.outputDir)
             self.output.grid(row=1, column=1)
-            
+
+            #Backend
+            self.process = backend.Backend(self.typeNeuralNet, self.inputDir, self.outputDir )
+
+            #Progress bar
+            self.progress = Progressbar(self.mainTab, orient=HORIZONTAL,length=500,  mode='indeterminate') 
 
             # Start 
-            self.startButton = Button(self.mainTab, text="Start", command=self.run )
+            self.startButton = Button(self.mainTab, text="Start", command=self.run)
             self.startButton.grid(row=3, column=0)
 
         if (self.typeNeuralNet == "Self-classification"):

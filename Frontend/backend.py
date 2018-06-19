@@ -3,9 +3,7 @@ import time
 import os, shutil, webbrowser
 import numpy as np
 
-
 from PIL import Image
-
 
 import torch
 import torch.nn as nn
@@ -22,9 +20,48 @@ import tensorflow as tf
 from scipy import signal as signal
 import cv2
 
+class CustomDatasetFromImages(Dataset):
+    def __init__(self, csv_path, FolderName):
+        """
+        Args:
+            csv_path (string): path to csv file with labels
+            img_path (string): path to the folder where images are
+            transform: pytorch transforms for transforms and tensor conversion
+        """
+
+        self.data_info = pd.read_csv(csv_path, header=None)
+        
+        self.image_arr = np.asarray(self.data_info.iloc[:, 0])
+
+        self.label_arr = np.asarray(self.data_info.iloc[:, 1])
+        self.data_len = len(self.data_info.index)
+        self.foldername = FolderName
+
+    def __getitem__(self, index):
+        single_image_name = self.image_arr[index]
+
+        img_as_img = cv2.imread(self.foldername + '/'+ str(single_image_name), 0)
+        img_as_img = img_as_img[np.newaxis,...]
+        img_as_img = img_as_img/255
+        
+        img_as_tensor = torch.tensor(img_as_img, dtype=torch.float)
+        single_image_label = self.label_arr[index]
+
+        return (img_as_tensor, single_image_label)
+        
+
+    def __len__(self):
+        return self.data_len
+
+
+def register_extension(id, extension): Image.EXTENSION[extension.lower()] = id.upper()
+Image.register_extension = register_extension
+def register_extensions(id, extensions): 
+  for extension in extensions: register_extension(id, extension)
+Image.register_extensions = register_extensions
+
 params =  {
-    
-    #256, 256, 1
+
     'conv1': {
         'in_channel': 1,
 #         'in_channel': 3,   #to change depending on input
@@ -32,24 +69,13 @@ params =  {
         'kernel_size': 3,
         'stride': 1
     },
-    #254, 254, 8
-    
-    #maxpoll  
-    
-    #127, 127, 8
+
     'conv2': {
         'in_channel': 8, #refer to conv1_out_channel
         'out_channel': 16,
         'kernel_size': 3,
         'stride': 1
     },
-    #125, 125, 16
-    
-    
-    #maxpoll
-    
-    
-    #62, 62, 16
     
     'conv3': {
         'in_channel': 16, #refer to conv1_out_channel
@@ -57,21 +83,14 @@ params =  {
         'kernel_size': 3,
         'stride': 1
     },
-    #60, 60, 32
-    
-    #maxpoll
-    
-    #30, 30, 32
+
     'conv4': {
         'in_channel': 32, #refer to conv1_out_channel
         'out_channel': 64,
         'kernel_size': 3,
         'stride': 1
     },
-    #28, 28, 64
-    
-    #maxpoll
-    #14, 14, 64
+
 
     'conv5': {
         'in_channel': 64, #refer to conv1_out_channel
@@ -79,12 +98,8 @@ params =  {
         'kernel_size': 3,
         'stride': 1
     },
-    #12, 12, 128
-    #maxpoll
-    #6, 6, 128
 
-    
-    
+ 
     'flatten': 6*6*128,
     
     'linear': {
@@ -160,120 +175,108 @@ class ConvNet(nn.Module):
         out = self.max2d(self.relu(self.batch3(self.conv3(out))))
         out = self.max2d(self.relu(self.batch4(self.conv4(out))))
         out = self.max2d(self.relu(self.batch5(self.conv5(out))))
-
-        # print(out.size())
         out = out.view(out.size(0), -1)
         out = self.batch_lin_1(self.linear1(out))
         out = self.batch_lin_2(self.linear2(out))
         out = self.batch_lin_3(self.linear3(out))
-        # out = self.relu(self.linear1(out))
-        # out = self.relu(self.linear2(out))
-        # out = self.relu(self.linear3(out))
         out = self.softmax(out)
         
         return out
-
-# model = ConvNet()
-# model.load_state_dict(torch.load(filename))
-
-
-
-
-def resizeAndPad(img, size, padColor=0):
-
-    h, w = img.shape[:2]
-    sh, sw = size
-
-    # interpolation method
-    if h > sh or w > sw: # shrinking image
-        interp = cv2.INTER_AREA
-    else: # stretching image
-        interp = cv2.INTER_CUBIC
-
-    # aspect ratio of image
-    aspect = w/h  # if on Python 2, you might need to cast as a float: float(w)/h
-
-    # compute scaling and pad sizing
-    if aspect > 1: # horizontal image
-        new_w = sw
-        new_h = np.round(new_w/aspect).astype(int)
-        pad_vert = (sh-new_h)/2
-        pad_top, pad_bot = np.floor(pad_vert).astype(int), np.ceil(pad_vert).astype(int)
-        pad_left, pad_right = 0, 0
-    elif aspect < 1: # vertical image
-        new_h = sh
-        new_w = np.round(new_h*aspect).astype(int)
-        pad_horz = (sw-new_w)/2
-        pad_left, pad_right = np.floor(pad_horz).astype(int), np.ceil(pad_horz).astype(int)
-        pad_top, pad_bot = 0, 0
-    else: # square image
-        new_h, new_w = sh, sw
-        pad_left, pad_right, pad_top, pad_bot = 0, 0, 0, 0
-
-    # set pad color
-    if len(img.shape) is 3 and not isinstance(padColor, (list, tuple, np.ndarray)): # color image but only one color provided
-        padColor = [padColor]*3
-
-    # scale and pad
-    scaled_img = cv2.resize(img, (new_w, new_h), interpolation=interp)
-    scaled_img = cv2.copyMakeBorder(scaled_img, pad_top, pad_bot, pad_left, pad_right, borderType=cv2.BORDER_CONSTANT, value=padColor)
-
-    return scaled_img
-
-
-# img_as_img = cv2.imread('test.jpg', 0)
-# print(img_as_img)
-# img_as_img = resizeAndPad(img_as_img, (256, 256), 0)
-# print(img_as_img.shape)
-# img_as_img = img_as_img[np.newaxis, ...]
-# img_as_img = img_as_img[np.newaxis, ...]
-# img_as_img = img_as_img/255
-# print(img_as_img.shape)
-
-# img_as_tensor = torch.tensor(img_as_img, dtype=torch.float)
-
-# out = model(img_as_tensor)
-# print(out)
 
 class Backend:
     def __init__(self, typeNeuralNet):
         self.typeNeuralNet = typeNeuralNet
         self.finished = False
+        self.good = 0
+        self.uncertain = 0
+        self.bad = 0
 
-    def runModel(self, progressBar):
-        time.sleep(5)
+    def runModel(self, progressBar, inputDir, outputDir):
+        #time.sleep(5)
+        self.inputDirectory = inputDir
+        self.outputDirectory = outputDir
+
+        self.model = ConvNet()
+        self.loadModel("")
+        self.useModel()
+        self.move_files(self.predicitons, self.inputDirectory, self.outputDirectory)
+
         progressBar.stop()
         self.finished = True
         print("Done")
-        good = "13"
-        uncertain = "4"
-        bad = "1996"
-        output = (good, uncertain, bad )
-        return output
+ 
+        return (self.good, self.uncertain, self.bad )
     
-    def preprocessing(self, inputFile):
-        return
-        #TODO
+    def preprocessing(self, img, size, padColor=0):
+        h, w = img.shape[:2]
+        sh, sw = size
+
+        # interpolation method
+        if h > sh or w > sw: # shrinking image
+            interp = cv2.INTER_AREA
+        else: # stretching image
+            interp = cv2.INTER_CUBIC
+
+        # aspect ratio of image
+        aspect = w/h  
+
+        # compute scaling and pad sizing
+        if aspect > 1: # horizontal image
+            new_w = sw
+            new_h = np.round(new_w/aspect).astype(int)
+            pad_vert = (sh-new_h)/2
+            pad_top, pad_bot = np.floor(pad_vert).astype(int), np.ceil(pad_vert).astype(int)
+            pad_left, pad_right = 0, 0
+        elif aspect < 1: # vertical image
+            new_h = sh
+            new_w = np.round(new_h*aspect).astype(int)
+            pad_horz = (sw-new_w)/2
+            pad_left, pad_right = np.floor(pad_horz).astype(int), np.ceil(pad_horz).astype(int)
+            pad_top, pad_bot = 0, 0
+        else: # square image
+            new_h, new_w = sh, sw
+            pad_left, pad_right, pad_top, pad_bot = 0, 0, 0, 0
+
+        # set pad color
+        if len(img.shape) is 3 and not isinstance(padColor, (list, tuple, np.ndarray)): # color image but only one color provided
+            padColor = [padColor]*3
+
+        # scale and pad
+        scaled_img = cv2.resize(img, (new_w, new_h), interpolation=interp)
+        scaled_img = cv2.copyMakeBorder(scaled_img, pad_top, pad_bot, pad_left, pad_right, borderType=cv2.BORDER_CONSTANT, value=padColor)
+
+        return scaled_img
 
 
-    def loadModel(self, model, path, weights):
-        return
-    
-    
-
-        # TODO
-        # if (self.typeNeuralNet == "Classification-CNN"):
-            # neural_net = ConvNet()
-            # neural_net.load_state_dict(torch.load(filename))
-        # if (self.typeNeuralNet == "Denoising-CNN"):
+    def loadModel(self, weightsPath):
+        self.model.load_state_dict(torch.load(weightsPath))
 
 
-    def useModel(self, model):
-        return
-        # TODO
-        #dataset = CustomDatasetFromImages("drive/S_and_T_images/Test/Test/test_names.csv", "drive/S_and_T_images/Test/Test/")
-        #val_loader = torch.utils.data.DataLoader(my_dataset_val, batch_size = 100, shuffle=True)
+    def useModel(self):
+        self.dataset = CustomDatasetFromImages("drive/S_and_T_images/Test/Test/test_names.csv", "drive/S_and_T_images/Test/Test/")
+        self.testLoader = torch.utils.data.DataLoader(self.dataset, batch_size = 100)#, shuffle=True)
 
+        # set the model in .eval() mode 
+        self.model.eval()
+        
+         # iterate over all the mini-batches
+        self.predictions = []
+        for batch_idx, (data, target) in enumerate(self.testLoader):
+            prediction = self.model(data)
+            self.predictions.append(prediction)
+
+
+    def useModel2(self):
+        img_as_img = cv2.imread('test.jpg', 0)
+        print(img_as_img)
+        img_as_img = preprocessing(img_as_img, (256, 256), 0)
+        print(img_as_img.shape)
+        img_as_img = img_as_img[np.newaxis, ...]
+        img_as_img = img_as_img/255
+        
+        img_as_tensor = torch.tensor(img_as_img, dtype=torch.float)
+        out = self.model(img_as_tensor)
+        print(out)
     
     def move_files(self, modelOutputs, inputFolder, outputFolder):
         dir1 = "/good"
@@ -286,12 +289,19 @@ class Backend:
         list_input = [i for i in os.listdir(inputFolder)]
 
         for i, proba in enumerate(modelOutputs):
-            if proba < 0.5 :#random number
-                shutil.copy(list_input[i], outputFolder+ dir1)              
-            elif proba > 0.5 :
+            probGood = proba[0]
+            probBad = proba[1]
+
+            if probGood > 0.5 :
+                shutil.copy(list_input[i], outputFolder+ dir1)
+                self.good = self.good + 1
+           
+            elif probBad > 0.5 :
                 shutil.copy(list_input[i], outputFolder+ dir2)
+                self.bad = self.bad + 1
             else:
                 shutil.copy(list_input[i], outputFolder+ dir3)
+                self.uncertain = self.uncertain + 1
 
 
     def create_csv(self, inputs, outputs, true_values, rmse_vals=None):
