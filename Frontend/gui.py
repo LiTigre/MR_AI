@@ -11,6 +11,7 @@ import numpy as np
 
 import backend
 import imageViewer
+from PIL import Image, ImageTk
 
 
 class buildGUI(Frame):
@@ -29,6 +30,8 @@ class buildGUI(Frame):
         self.mainTab = ttk.Frame(self.tabControl)
         self.tabControl.add(self.mainTab, text='Main')
         self.tabControl.pack(expand=1, fill='both')
+
+
         if (self.typeNeuralNet == "Classification-CNN"):
             self.advancedOptionsTab(self.tabControl)
 
@@ -64,13 +67,24 @@ class buildGUI(Frame):
         if (self.typeNeuralNet == "Self-classification"):
 
             # TODO: counter
+            self.timeLeft = 10
+            self.paused = True
+            self.timeLeftLabel = Label(self.mainTab, text="", width=10)
+            self.timeLeftLabel.grid(row=1, column=1)
+            self.countdownButton = Button(self.mainTab, text = "Start", command = self.toggle)
+            self.countdownButton.grid(row=1, column=0)
+
+            self.paused = True
+
+
             # TODO: disable button once counter at 0
 
 
             # TODO: Image viewer
-            self.imageViewer = imageViewer.ImageViewer(self.mainTab)
-            self.imageViewer.btn.grid(row = 1)
-
+            # self.imageViewer = imageViewer.ImageViewer(self.mainTab)
+            # self.imageView = self.imageViewer.btn
+            # self.imageView.grid(row = 1, column = 0)
+  
             # TODO: Buttons
             self.blurryButton = Button(self.mainTab, text="Blurry", command= self.mainTab.quit )
             self.blurryButton.grid(row=5, column=0)
@@ -109,6 +123,32 @@ class buildGUI(Frame):
         percentageLabel.grid(row=0, column=0)
         self.percentage = Entry(self.advancedOptionsTab)
         self.percentage.grid(row=0, column=1)
+
+
+    def toggle(self):
+
+        if self.paused:
+            self.paused = False
+            self.countdownButton.config(text = "Reset")
+            self.countdown()
+        else:
+            self.timeLeft = 10
+            self.paused = True
+            self.countdownButton.config(text='Start')
+
+
+
+    def countdown(self):
+        if self.paused:
+            return
+        elif self.timeLeft <= 0:
+            self.timeLeftLabel.config(text="time's up!")
+        else:
+            self.timeLeftLabel.config(text="%d" % self.timeLeft)
+            self.timeLeft = self.timeLeft - 1
+            self.after(1000, self.countdown)
+            
+
         
 
 class buildMenu(Frame):
