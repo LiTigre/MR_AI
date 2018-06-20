@@ -9,7 +9,7 @@ import time
 import os, shutil, webbrowser
 import numpy as np
 
-import backend
+import backend as bk
 import imageViewer
 from PIL import Image, ImageTk
 
@@ -55,7 +55,7 @@ class buildGUI(Frame):
             self.output.grid(row=1, column=1)
 
             #Backend
-            self.process = backend.Backend(self.typeNeuralNet, self.inputDir, self.outputDir )
+            self.process = bk.Backend(self.typeNeuralNet )
 
             #Progress bar
             self.progress = Progressbar(self.mainTab, orient=HORIZONTAL,length=500,  mode='indeterminate') 
@@ -98,11 +98,11 @@ class buildGUI(Frame):
         def runInner():
             self.progress.grid(row=5,column=0)
             self.progress.start()
-            (good, uncertain, bad ) = self.process.runModel(self.progress)
+            (good, uncertain, bad ) = self.process.runModel(self.progress,self.inputDir, self.outputDir)
             if messagebox.askyesno('Process completed!',  'There are : \n-' +
-                                        good + " good scans \n-" +
-                                        bad  + " bad scans \n-" +
-                                        uncertain + " uncertain scans \n\n" +
+                                        str(good) + " good scans \n-" +
+                                        str(bad)  + " bad scans \n-" +
+                                        str(uncertain) + " uncertain scans \n\n" +
                                         "Do you want to go to the output directory?", icon = messagebox.INFO):
                                             webbrowser.open(self.outputDir)                     
             self.progress.grid_forget()

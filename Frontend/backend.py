@@ -2,6 +2,7 @@ import threading
 import time
 import os, shutil, webbrowser
 import numpy as np
+import pandas as pd
 
 from PIL import Image
 
@@ -20,6 +21,8 @@ import tensorflow as tf
 from scipy import signal as signal
 import cv2
 
+import pdb
+
 class CustomDatasetFromImages(Dataset):
     def __init__(self, csv_path, FolderName):
         """
@@ -30,7 +33,6 @@ class CustomDatasetFromImages(Dataset):
         """
 
         self.data_info = pd.read_csv(csv_path, header=None)
-        
         self.image_arr = np.asarray(self.data_info.iloc[:, 0])
 
         self.label_arr = np.asarray(self.data_info.iloc[:, 1])
@@ -153,7 +155,6 @@ class ConvNet(nn.Module):
 
         # Pooling layers
         self.max2d = nn.MaxPool2d(kernel_size= 2)
-        self.avgpool2d = nn.AvgPool2d(kernel_size = 2)
         
         # Non-linear activations
         self.relu = nn.ReLU()
@@ -190,16 +191,17 @@ class Backend:
         self.good = 0
         self.uncertain = 0
         self.bad = 0
+        self.predictions = []
 
     def runModel(self, progressBar, inputDir, outputDir):
-        #time.sleep(5)
+        
         self.inputDirectory = inputDir
         self.outputDirectory = outputDir
 
         self.model = ConvNet()
-        self.loadModel("")
+        self.loadModel("neural_network_55.pt")
         self.useModel()
-        self.move_files(self.predicitons, self.inputDirectory, self.outputDirectory)
+        self.move_files(self.predictions, self.inputDirectory, self.outputDirectory)
 
         progressBar.stop()
         self.finished = True
@@ -253,14 +255,14 @@ class Backend:
 
 
     def useModel(self):
-        self.dataset = CustomDatasetFromImages("drive/S_and_T_images/Test/Test/test_names.csv", "drive/S_and_T_images/Test/Test/")
+        self.dataset = CustomDatasetFromImages("/home/jenisha/MR_AI/Frontend/test_names.csv", "/home/jenisha/MR_AI/Frontend/Test/")
         self.testLoader = torch.utils.data.DataLoader(self.dataset, batch_size = 100)#, shuffle=True)
 
         # set the model in .eval() mode 
         self.model.eval()
         
          # iterate over all the mini-batches
-        self.predictions = []
+        
         for batch_idx, (data, target) in enumerate(self.testLoader):
             prediction = self.model(data)
             self.predictions.append(prediction)
@@ -269,7 +271,7 @@ class Backend:
     def useModel2(self):
         img_as_img = cv2.imread('test.jpg', 0)
         print(img_as_img)
-        img_as_img = preprocessing(img_as_img, (256, 256), 0)
+        img_as_img = self.preprocessing(img_as_img, (256, 256), 0)
         print(img_as_img.shape)
         img_as_img = img_as_img[np.newaxis, ...]
         img_as_img = img_as_img/255
@@ -279,28 +281,44 @@ class Backend:
         print(out)
     
     def move_files(self, modelOutputs, inputFolder, outputFolder):
-        dir1 = "/good"
-        dir2 = "/bad"
-        dir3 = "/unsure"
-        os.makedirs(os.path.join(outputFolder, dir1))
-        os.makedirs(os.path.join(outputFolder, dir2))
-        os.makedirs(os.path.join(outputFolder, dir3))
+        dir1 = "good"
+        dir2 = "bad"
+        dir3 = "unsure"
+
+        directory1 = os.path.join(outputFolder, dir1)
+        directory2 = os.path.join(outputFolder, dir2)
+        directory3 = os.path.join(outputFolder, dir3)
+        
+        if not (os.path.exists(directory1)):
+            os.makedirs(directory1)
+        if not (os.path.exists(directory2)):
+            os.makedirs(directory2)
+        if not (os.path.exists(directory3)):
+            os.makedirs(directory3)
+
+        print(outputFolder)
+        print(inputFolder)
 
         list_input = [i for i in os.listdir(inputFolder)]
 
-        for i, proba in enumerate(modelOutputs):
+        for i, proba in enumerate(modelOutputs[0]):
+            print(proba)
             probGood = proba[0]
+            print(probGood)
             probBad = proba[1]
 
             if probGood > 0.5 :
-                shutil.copy(list_input[i], outputFolder+ dir1)
+                dir_temp = os.path.join(inputFolder, list_input[i])
+                shutil.copy(dir_temp, directory1)
                 self.good = self.good + 1
            
             elif probBad > 0.5 :
-                shutil.copy(list_input[i], outputFolder+ dir2)
+                dir_temp = os.path.join(inputFolder, list_input[i])
+                shutil.copy(dir_temp, directory2)
                 self.bad = self.bad + 1
             else:
-                shutil.copy(list_input[i], outputFolder+ dir3)
+                dir_temp = os.path.join(inputFolder, list_input[i])
+                shutil.copy(dir_temp, directory3)
                 self.uncertain = self.uncertain + 1
 
 
