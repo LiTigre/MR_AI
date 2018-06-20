@@ -27,7 +27,7 @@ class buildGUI(Frame):
 
         #Tabs
         self.tabControl = ttk.Notebook(self.master)
-        self.mainTab = ttk.Frame(self.tabControl)
+        self.mainTab = Frame(self.tabControl, bg = "white")
         self.tabControl.add(self.mainTab, text='Main')
         self.tabControl.pack(expand=1, fill='both')
 
@@ -36,33 +36,34 @@ class buildGUI(Frame):
             self.advancedOptionsTab(self.tabControl)
 
             #Input
-            inputLabel = Label(self.mainTab, text="Input Folder")
+            inputLabel = Label(self.mainTab, text="Input Folder", bg = "white", font=("Helvetica", 20))
             inputLabel.grid(row=0, column=0)
 
             #Output
-            outputLabel = Label(self.mainTab, text="Output Folder")
+            outputLabel = Label(self.mainTab, text="Output Folder", bg = "white", font=("Helvetica", 20))
             outputLabel.grid(row=1, column=0)
 
 
             #Input Folder
             self.inputDir = filedialog.askdirectory(title = "Select input directory")
-            self.input = Label(self.mainTab, text=self.inputDir)
+            self.input = Label(self.mainTab, text=self.inputDir, bg = "white", font=("Helvetica", 20))
             self.input.grid(row=0, column=1)
 
             #Output Folder
             self.outputDir = filedialog.askdirectory(title = "Select output directory")
-            self.output = Label(self.mainTab, text=self.outputDir)
+            self.output = Label(self.mainTab, text=self.outputDir, bg = "white",font=("Helvetica", 20))
             self.output.grid(row=1, column=1)
+
+
+            # Start 
+            self.startButton = Button(self.mainTab, text="Start", command=self.run, bg = "white", font=("Helvetica", 20))
+            self.startButton.grid(row=3, column=0)
 
             #Backend
             self.process = bk.Backend(self.typeNeuralNet )
 
             #Progress bar
             self.progress = Progressbar(self.mainTab, orient=HORIZONTAL,length=500,  mode='indeterminate') 
-
-            # Start 
-            self.startButton = Button(self.mainTab, text="Start", command=self.run)
-            self.startButton.grid(row=3, column=0)
 
         if (self.typeNeuralNet == "Self-classification"):
 
@@ -89,9 +90,6 @@ class buildGUI(Frame):
             self.notBlurryButton.grid(row=5, column=1)
 
             # TODO: Dynamic display
-
-            
-
 
     
     def run(self):
@@ -166,15 +164,21 @@ class buildMenu(Frame):
         self.pack(fill=BOTH, expand=1)
 
         #Neural net selection
-        menuLabel = Label(self, text="Select a mode")
+        menuLabel = Label(self, text="Select a mode", bg = "white", font=("Helvetica", 20))
         menuLabel.grid(row=0, column=0)
 
         menuOptions = ["Classification-CNN", "Self-classification"]
-        variable = StringVar(self.master)
+        variable = StringVar(self)
+
         variable.set("               ")
 
+
         self.menu = OptionMenu(self, variable, *menuOptions, command = self.selectNN)
+        self.menu.configure(bg="white",font=("Helvetica", 20))
         self.menu.grid(row = 0, column = 1)
+
+        self.menu2 = self.menu.nametowidget(self.menu.menuname)
+        self.menu2.configure(bg="white",font=("Helvetica", 20)) 
 
     def selectNN(self, value):
 
