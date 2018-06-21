@@ -15,6 +15,6 @@ We implemented a neural network with 5 convolutional layers and 3 fully connecte
 
 ## User interface
 Using the built-in Python GUI ie TKinter, we implemented a desktop application that asks the user for an input folder with brain slices ie MRI pictures and for an output folder. There is also an advanced option tabs with includes an option to change the threshold output probability for the neural net. To start the classification process, the users presses on the "start" button. The integrated neural net proceeds to separate the slices into 3 categories: "good" scans ie no motion artefacts, "bad" scans ie with motion artefacts and "uncertain" scans for the scans associated with lower probability values than the threshold probability
-![alt text](https://imgur.com/a/MrKb3Gj)
+![Alt Text](https://imgur.com/a/MrKb3Gj)
 
 ## Future directions
